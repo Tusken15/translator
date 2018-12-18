@@ -1,0 +1,13 @@
+.green, .red {
+    width: 10px!important;
+    height:10px!important;
+    padding: 10px!important;
+    display: block!important;
+    border-radius: 50px!important;
+}
+.green {
+    background:green!important;
+}
+.red {
+    background:red!important;
+}
