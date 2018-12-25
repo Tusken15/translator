@@ -1,13 +1,66 @@
-.green, .red {
-    width: 10px!important;
-    height:10px!important;
-    padding: 10px!important;
-    display: block!important;
-    border-radius: 50px!important;
+.yes:after, .no:after {
+    font-family: "Font Awesome 5 Free";
+   /*  font-weight: normal;
+    font-style: normal; */
+    margin:0px 0px 0px 10px;
+    text-decoration:none;
 }
-.green {
-    background:green!important;
+.yes:after {
+    content: "\f164";
+    color:#3490dc!important;
 }
-.red {
-    background:red!important;
+.no:after {
+    content: "\f165";
+    color:red!important;
+}
+
+.yes:hover, .no:hover {
+    cursor: pointer;
+}
+
+td {
+    padding: 10px;
+}
+
+thead td {
+    background: #ccc;
+}
+
+tr:nth-child(even) td {
+    background: #fafafa
+}
+
+tr:hover td {
+    background: #ddd;
+}
+
+textarea {
+    width: 100%;
+    height: 200px;
+}
+
+.c-red i {
+    color: red;
+}
+
+.loader {
+    border: 16px solid #f3f3f3; /* Light grey */
+    border-top: 16px solid #3490dc	; /* Blue */
+    border-radius: 50%;
+    width: 120px;
+    height: 120px;
+    animation: spin 2s linear infinite;
+    position: fixed;
+    top: 45%;
+    left: 46%;
+  }
+  
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+
+.table-input {
+    border: 0px;
+    background: transparent;
 }

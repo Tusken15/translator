@@ -18,3 +18,8 @@ Route::get('/', function () {
 Auth::routes();
 
 Route::get('/home', 'HomeController@index')->name('home');
+Route::get('ajax', function(){ return view('ajax'); });
+Route::post('/set-as-known','AjaxController@post');
+Route::post('/delete-word','AjaxController@delete');
+Route::post('/import-file','HomeController@import');
+Route::post('/change-translation','AjaxController@changeTranslation');
