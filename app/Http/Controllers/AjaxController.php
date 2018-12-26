@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Carbon;
 
 class AjaxController extends Controller
 {
@@ -29,7 +30,7 @@ class AjaxController extends Controller
     public function delete(Request $request) {
         $word = DB::table('words')
             ->where('ID', $request->id)
-            ->delete();
+            ->update(['deleted_at' => Carbon::now()]);
 
         $response = array(
             'status' => 'success',

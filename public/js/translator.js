@@ -11,10 +11,26 @@ function setKnown(id) {
         dataType: 'JSON',
         success: function (data) { 
             $('.known-' + id + ' span').removeClass('yes').removeClass('no').addClass(data.status);
+            $('#row-' + id).slideUp('slow');
             hideLoader();
         }
     }); 
 }    
+
+function translateWords() {
+    showLoader();
+    $.ajax({ 
+        url: '/translate',
+        type: 'POST',
+        data: {
+            _token:     CSRF_TOKEN,
+        },
+        dataType: 'JSON',
+        success: function (data) { 
+            hideLoader();
+        }
+    }); 
+}
 
 function deleteWord(id) {
     showLoader();

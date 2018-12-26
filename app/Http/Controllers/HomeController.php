@@ -31,20 +31,20 @@ class HomeController extends Controller
      */
     public function index()
     {
-
-        $this->translateWords();
-
         $words = DB::table('words')
                     ->orderBy('count_words', 'desc') 
                     ->where('known','no')
+                    ->whereNull('deleted_at')
                     ->get();
 
         $known = DB::table('words')
                     ->where('known','yes')
+                    ->whereNull('deleted_at')
                     ->count();
 
         $total = DB::table('words')
                     ->select(DB::raw('SUM(count_words) as total_words'))
+                    ->whereNull('deleted_at')
                     ->get();
 
         View::share('words' , $words);
@@ -60,6 +60,7 @@ class HomeController extends Controller
 
         $words = DB::table('words')
                     ->where('translation','')
+                    ->whereNull('deleted_at')
                     ->orderBy('count_words', 'desc') 
                     ->get();
 
@@ -118,30 +119,39 @@ class HomeController extends Controller
 
         foreach($words AS $word) {
 
-            $trans = $tr->setOptions(['timeout' => 100, 'proxy' => $proxylist[0]])->translate($word->word);
+            if(!$useProxies) {
+                $trans = $tr->translate($word->word);
 
-            $proxies = DB::table('proxies')
-                                ->where('proxy', $proxylist[0])
-                                ->first();
-
-            if(empty($proxies)) {
-                DB::table('proxies')
-                    ->insert(['proxy' => $proxylist[0], 'imports' => 0, 'created_at' => Carbon::now()]);
-            }
-
-            if($trans == ' ') {
-                unset($proxylist[0]);
-                if(empty($proxylist)) {
-                    return false;
+                if($trans == ' ') {
+                    $useProxies = true;
+                    continue;
                 }
-                $proxylist = array_values($proxylist);
-                continue;
             } else {
-                // set result of proxy
-                $imports = (isset($proxies->imports)) ? $proxies->imports : 0;
-                DB::table('proxies')
-                    ->where('proxy',  $proxylist[0])
-                    ->update(['imports' => $imports+1, 'updated_at' => Carbon::now()]);
+                $trans = $tr->setOptions(['timeout' => 100, 'proxy' => $proxylist[0]])->translate($word->word);
+
+                $proxies = DB::table('proxies')
+                                    ->where('proxy', $proxylist[0])
+                                    ->first();
+
+                if(empty($proxies)) {
+                    DB::table('proxies')
+                        ->insert(['proxy' => $proxylist[0], 'imports' => 0, 'created_at' => Carbon::now()]);
+                }
+
+                if($trans == ' ') {
+                    unset($proxylist[0]);
+                    if(empty($proxylist)) {
+                        return false;
+                    }
+                    $proxylist = array_values($proxylist);
+                    continue;
+                } else {
+                    // set result of proxy
+                    $imports = (isset($proxies->imports)) ? $proxies->imports : 0;
+                    DB::table('proxies')
+                        ->where('proxy',  $proxylist[0])
+                        ->update(['imports' => $imports+1, 'updated_at' => Carbon::now()]);
+                }
             }
 
             Word::where('ID', $word->ID)
@@ -177,7 +187,10 @@ class HomeController extends Controller
             $caption = str_replace(']',' ', $caption);
             $caption = str_replace('[',' ', $caption);
             $caption = str_replace('~',' ', $caption);
+            $caption = str_replace('<i>',' ', $caption);
             $caption = str_replace('</i>',' ', $caption);
+            $caption = str_replace('#',' ', $caption);
+            $caption = str_replace('&',' ', $caption);
             $caption = trim(preg_replace('/\s+/', ' ', $caption));
 
             // split to words

@@ -19,7 +19,11 @@
                 <div class="text-right mb-2 col-md-5">
                     <form enctype="multipart/form-data" id="import" action="/import-file" method="post">
                         @csrf
-                        <input type="file" name="file" onchange="$('#import').submit();" class="btn btn-primary" value="Import"/>
+                        <button type="button" onclick="translateWords()" class="btn btn-primary">Translate</button>
+                        <label for="file" class="custom-file-upload btn btn-primary mb-0"> 
+                            Import
+                        </label>
+                        <input id="file" type="file" name="file" onchange="$('#import').submit();"/>
                     </form>
                 </div>
             </div>
@@ -48,7 +52,7 @@
                                     <span class='{{$word->known}}'></span>
                                 </td>
                                 <td>
-                                    <a class="c-red" href="javascript:void(0)" onclick="deleteWord({{$word->ID}})"><i class="fas fa-trash-alt"></i></a>
+                                    <a class="c-red" href="javascript:void(0)" onclick="deleteWord({{$word->ID}})"><i class="fa fa-eye-slash"></i></a>
                                 </td>
                             </tr>
                         @endforeach
@@ -81,7 +85,4 @@
 
 <meta name="csrf-token" content="{{ csrf_token() }}" />
 -->
-
-<link href="/css/styles.css" rel="stylesheet" type="text/css">
-<script src="{{asset('js/translator.js')}}"></script>
 @endsection
