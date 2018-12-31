@@ -213,8 +213,8 @@ class HomeController extends Controller
 
                 $search = trim(trim($word),'\'');
 
-                // dont save numbers or empty strings
-                if(empty($search) || is_numeric($word)) {
+                // dont save numbers or empty strings or small words
+                if(empty($search) || is_numeric($word) || strlen($word) < 2) {
                     continue;
                 }
 
