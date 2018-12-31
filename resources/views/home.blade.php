@@ -9,7 +9,7 @@
                     <div class="alert alert-success">
                         <div id="translate-info"></div>
                         <ul class="mb-0" >
-                            <li>Known: {{$known}}</li>
+                            <li>Known: <span id="known-count">{{$known}}</span></li>
                             @foreach ($errors->all() as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
@@ -23,7 +23,7 @@
                         <label for="file" class="custom-file-upload btn btn-primary mb-0"> 
                             Import
                         </label>
-                        <input id="file" type="file" name="file" onchange="$('#import').submit();"/>
+                        <input id="file" type="file" name="file" onchange="$('#import').submit();" accept=".srt"/>
                     </form>
                 </div>
             </div>
@@ -36,7 +36,7 @@
                             <td>Found</td>
                             <td>Frequency</td>
                             <td>Known</td>
-                            <td>Actions</td>
+                            <td>Hide word</td>
                         </tr>
                     </thead>
                     <tbody>

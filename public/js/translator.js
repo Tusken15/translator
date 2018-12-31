@@ -12,8 +12,9 @@ function setKnown(id) {
         success: function (data) { 
             $('.known-' + id + ' span').removeClass('yes').removeClass('no').addClass(data.status);
             $('#row-' + id).slideUp('slow');
-            hideLoader();
-        }
+            $('#known-count').html(data.known); 
+            hideLoader();  
+        } 
     }); 
 }    
 

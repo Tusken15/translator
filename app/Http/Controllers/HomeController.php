@@ -11,6 +11,8 @@ use App\Word;
 use Illuminate\Support\MessageBag;
 use Stichoza\GoogleTranslate\GoogleTranslate;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Auth;
+use App\User;
 
 class HomeController extends Controller
 {
@@ -31,26 +33,37 @@ class HomeController extends Controller
      */
     public function index()
     {
+
         $words = DB::table('words')
-                    ->orderBy('count_words', 'desc') 
-                    ->where('known','no')
-                    ->whereNull('deleted_at')
+                    ->leftJoin('words_known', 'words.ID', '=', 'words_known.word_id')
+                    ->where('words_known.user_id', Auth::id())
+                    ->where('words_known.known', 'no')
+                    ->orderBy('words_known.count_words', 'desc') 
+                    ->whereNull('words_known.deleted_at')
+                    ->select('words.ID', 'words.word', 'words.translation', 'words_known.count_words', 'words_known.known')
+                    ->limit(1000)
                     ->get();
 
         $known = DB::table('words')
-                    ->where('known','yes')
-                    ->whereNull('deleted_at')
+                    ->leftJoin('words_known', 'words.ID', '=', 'words_known.word_id')
+                    ->where('words_known.user_id', Auth::id())
+                    ->where('words_known.known','yes')
+                    ->whereNull('words_known.deleted_at')
                     ->count();
 
-        $total = DB::table('words')
-                    ->select(DB::raw('SUM(count_words) as total_words'))
+        $total = DB::table('words_known')
+                    ->select(DB::raw('SUM(count_words) as total_words, COUNT(id) AS words_count'))
+                    ->where('words_known.user_id', Auth::id())
                     ->whereNull('deleted_at')
                     ->get();
 
+        $countWords = $total[0]->words_count;
+        $totalWords = $total[0]->total_words;
+        $percentage = ($countWords != 0) ? round(($known/$countWords)*100,2) : '0,00';
+
         View::share('words' , $words);
-        View::share('notTranslated' , $words);
-        View::share('known' , $known.' / '.($known+count($words)).' ('.round((($known/(count($words)+$known)))*100,2).'%)');
-        View::share('total_words' , $total[0]->total_words);
+        View::share('known' , $known.' / '.$countWords.' ('.$percentage.'%)');
+        View::share('total_words' , $totalWords);
         return view('home');
     }
 
@@ -60,8 +73,6 @@ class HomeController extends Controller
 
         $words = DB::table('words')
                     ->where('translation','')
-                    ->whereNull('deleted_at')
-                    ->orderBy('count_words', 'desc') 
                     ->get();
 
         $tr = new GoogleTranslate('sk', 'en');
@@ -167,7 +178,7 @@ class HomeController extends Controller
         $captions   = $parser->parse();
 
         // stats
-        $updated    = 0;
+        $updated    = [];
         $imported   = 0;
        
         foreach($captions as $caption){
@@ -196,6 +207,7 @@ class HomeController extends Controller
             // split to words
             $words  = explode(' ', $caption);
 
+
             // through each word
             foreach($words AS $word) {
 
@@ -206,38 +218,69 @@ class HomeController extends Controller
                     continue;
                 }
 
-                // check if 
+                // check if word exists in database
                 $rec = Word::where('word', $search)
                             ->first();
 
                 if(empty($rec)) {
 
+                    // word doesnt exist in database
                     $insData    = [
                         'word'          => $search,
                         'translation'   => '',
-                        'count_words'   => 1,
-                        'known'         => 'no'
                     ];
-                    Word::insert($insData);
+                    $id = Word::insertGetId($insData);
                     $imported++;
 
+                    // insert words detail
+                    $this->insertWordDetail($id);
                 } else {
+                    // word exist in database
+                    // check if user imported the word already
+                    $wordDetail = DB::table('words_known')
+                                    ->where('word_id', $rec['ID'])
+                                    ->where('user_id', Auth::id())
+                                    ->first();
 
-                    $uptData = [
-                        'count_words'   => $rec['count_words']+1
-                    ];
-                    Word::where('ID', $rec['ID'])
-                        ->update($uptData);
-                    $updated++;
+                    if(!empty($wordDetail)) {
+                        // word exists in users database -> update his count
+                        $uptData = [
+                            'count_words'   => $wordDetail->count_words+1
+                        ];
+                        DB::table('words_known')
+                            ->where('word_id', $rec['ID'])
+                            ->where('user_id', Auth::id())
+                            ->update($uptData);
+                        
+                        if(!isset($updated[$rec['ID']])) {
+                            $updated[$rec['ID']] = true;
+                        }  
+                        
+                    } else {
+                        // words doesnt exist in users database -> create new record
+                        $this->insertWordDetail($rec['ID']);
+                        $imported++;
+                    }
+
                 }
             }
-
         }
 
         $errors = new MessageBag();
         $errors->add('custom_error',    'File: '.$request->file('file')->getClientOriginalName());
-        $errors->add('custom_error2',   'Imported: '.$imported.' Updated: '.$updated);
+        $errors->add('custom_error2',   'Imported: '.$imported.' Updated: '.count($updated));
         return redirect('/home')->withErrors($errors);
+    }
+
+    private function insertWordDetail($wordID) {
+        $insData    = [
+            'user_id'       => Auth::id(),
+            'word_id'       => $wordID,
+            'known'         => 'no',
+            'count_words'   => 1,
+        ];
+        DB::table('words_known')
+            ->insert($insData);
     }
 
 }
