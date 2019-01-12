@@ -5,7 +5,7 @@
     <div class="row justify-content-center">
         <div class="col-md-12">
             <div class="row">
-                <div class="text-left mb-2 col-md-7">
+                <div class="text-left mb-2 col-md-9">
                     <div class="alert alert-success">
                         <div id="translate-info"></div>
                         <ul class="mb-0" >
@@ -16,18 +16,18 @@
                         </ul>
                     </div>
                 </div>
-                <div class="text-right mb-2 col-md-5">
+                <div class="text-right mb-2 col-md-3">
                     <form enctype="multipart/form-data" id="import" action="/import-file" method="post">
                         @csrf
-                        <button type="button" onclick="translateWords()" class="btn btn-primary">Translate</button>
+                        <!--<button type="button" onclick="translateWords()" class="btn btn-primary">Translate</button>-->
                         <label for="file" class="custom-file-upload btn btn-primary mb-0"> 
                             Import
                         </label>
-                        <input id="file" type="file" name="file" onchange="$('#import').submit();" accept=".srt"/>
+                        <input id="file" type="file" name="file" onchange="$('#import').submit();translateWords();" accept=".srt"/>
                     </form>
                 </div>
             </div>
-            <div class="card">
+            <div class="card responsive-table">
                 <table>
                     <thead>
                         <tr>

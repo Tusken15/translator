@@ -14,12 +14,12 @@ function setKnown(id) {
             $('#row-' + id).slideUp('slow');
             $('#known-count').html(data.known); 
             hideLoader();  
-        } 
+        }   
     }); 
 }    
 
 function translateWords() {
-    showLoader();
+    setTimeout('', 5000);
     $.ajax({ 
         url: '/translate',
         type: 'POST',
@@ -28,7 +28,6 @@ function translateWords() {
         },
         dataType: 'JSON',
         success: function (data) { 
-            hideLoader();
         }
     }); 
 }

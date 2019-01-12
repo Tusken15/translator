@@ -184,7 +184,7 @@ class HomeController extends Controller
         foreach($captions as $caption){
 
             // sanitize words
-            $orig    = $caption->text;
+            $orig    = strip_tags($caption->text);
             $caption = str_replace('!',' ', $orig);
             $caption = str_replace(',',' ', $caption);
             $caption = str_replace('.',' ', $caption);
@@ -202,6 +202,7 @@ class HomeController extends Controller
             $caption = str_replace('</i>',' ', $caption);
             $caption = str_replace('#',' ', $caption);
             $caption = str_replace('&',' ', $caption);
+            $caption = str_replace(':',' ', $caption);
             $caption = trim(preg_replace('/\s+/', ' ', $caption));
 
             // split to words
@@ -211,8 +212,8 @@ class HomeController extends Controller
             // through each word
             foreach($words AS $word) {
 
-                $search = trim(trim($word),'\'');
-
+                $search = ucfirst(trim(trim($word),'\'')); 
+                
                 // dont save numbers or empty strings or small words
                 if(empty($search) || is_numeric($word) || strlen($word) < 2) {
                     continue;

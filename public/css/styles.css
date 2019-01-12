@@ -68,3 +68,12 @@ textarea {
 input[type="file"] {
     display: none;
 }
+
+.responsive-table {
+    overflow-x: auto;
+} 
+
+.responsive-table table {
+    width: 100%;
+    min-width: 600px;
+}
